@@ -1,0 +1,29 @@
+
+<div id="flashwarning" class="alert alert-dismissable alert-danger hidden">
+  <button type="button" class="close" data-dismiss="alert">×</button>
+  <strong>Oh snap!</strong> <a href="#" class="alert-link">Change a few things up</a> and try submitting again.
+</div>
+
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+        <div class="list-group">
+            <a href="#" class="list-group-item active">Week #1</a>
+            {{#images}}
+                <a class="list-group-item">
+                    <div class="row centering">
+                        <div class="col-sm-10">
+                            <img src="{{ src }}" height="100px">
+                        </div>
+                        <div class="col-sm-2">
+                            <button data-week="{{ week }}" data-name="{{ src }}" type="button" class="btn btn-success btn-lg pull-right choose">Choose</button>
+                        </div>
+                    </div>
+                </a>
+            {{/images}}
+        </div>
+    </div>
+</div>
+<div class="text-center">
+    <button type="button" class="btn btn-warning btn-lg send-email">Submit</button>
+</div>
