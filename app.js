@@ -6,14 +6,14 @@ var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     exphbs = require('express3-handlebars'),
-    lessMiddleware = require('less-middleware');
-
-
+    lessMiddleware = require('less-middleware'),
+    _ = require('underscore'),
+    mongojs = require('mongojs');
 /*
  * Initiate Express
  */
-var app = express();
-
+var app = express()
+    , db = mongojs(process.env.MONGO_URI || "mongodb://localhost/thetop3", ["users", "media"]);
 
 /* 
  * App Configurations
@@ -53,19 +53,31 @@ app.configure('development', function(){
 * Route for Index
 */
 app.get('/', function(req, res) {
-    // db.images.find({ week: "X"}, function(err, images) {
-        var images = [
-            { src: "/img/yhat_logo_enterprise.png", week: 1 },
-            { src: "/img/yhat_logo_lrg_clr_bkg.png", week: 1 },
-            { src: "/img/yhat_logo_transparent_bkg.png", week: 1 },
-            { src: "/img/yhat_logo_white_bkg.png", week: 1 }
-        ]
-        res.render('index', { images: images });
-    // });
+    var q = {media_format: "img"};
+
+    if (req.query.date_emailed) {
+        q.date_emailed = req.query.date_emailed;
+    }
+
+    db.media.distinct("date_emailed", function (err, dates) {
+        dates = dates.sort();
+        db.media.find(q, function(err, images) {
+            displayable = []
+            _.each(images,  function (img) {
+                data_str = "data:image/png;base64,"+img.img_data
+                record = {
+                    src: data_str, 
+                    id: img._id.toString(), 
+                    week: img.date_emailed
+                }
+                displayable.push(record)
+            });
+            res.render('index', { images: displayable, dates: dates });
+        });
+    });
 });
 
 app.post('/image', function(req, res) {
-    console.log(req.body);
     res.send({ status: "OK" });
 });
 
