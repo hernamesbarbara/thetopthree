@@ -23,8 +23,8 @@ $(document).ready(function(){
     
     var date_str_list = $(".paginate a").map(function (i, d) { return d.text } );
 
-    _.each(date_str_list, function (d) {
-        console.log(d)
-    });
+    // _.each(date_str_list, function (d) {
+    //     console.log(d)
+    // });
     
 });

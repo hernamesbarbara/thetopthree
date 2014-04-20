@@ -8,7 +8,9 @@ var express = require('express'),
     exphbs = require('express3-handlebars'),
     lessMiddleware = require('less-middleware'),
     _ = require('underscore'),
-    mongojs = require('mongojs');
+    mongojs = require('mongojs'),
+    moment = require('moment');
+
 /*
  * Initiate Express
  */
@@ -53,34 +55,48 @@ app.configure('development', function(){
 * Route for Index
 */
 app.get('/', function(req, res) {
-    var q = {media_format: "img"};
-
-    if (req.query.date_emailed) {
-        q.date_emailed = req.query.date_emailed;
-    }
-
     db.media.distinct("date_emailed", function (err, dates) {
         dates = dates.sort();
+        console.log(dates[0])
+        if (req.query.date_emailed) {
+            q = {media_format: 'img', date_emailed: req.query.date_emailed}
+        }
+        else {
+            q = {media_format: 'img', date_emailed: dates[0]}
+        }
         db.media.find(q, function(err, images) {
-            displayable = []
+            var displayable = [];
             _.each(images,  function (img) {
                 data_str = "data:image/png;base64,"+img.img_data
                 record = {
                     src: data_str, 
                     id: img._id.toString(), 
-                    week: img.date_emailed
+                    date: img.date_emailed
                 }
                 displayable.push(record)
             });
-            res.render('index', { images: displayable, dates: dates });
+            indices = _.zip(_.range(1, dates.length+1), dates)
+            idx = _.indexOf(dates, req.query.date_emailed);
+            prev = dates[idx - 1];
+            next = dates[idx + 1];
+            payload = {
+                images: displayable, 
+                pagination: indices.slice(Math.max(idx-5,0), Math.min(idx+5, indices.length)), 
+                isfirst: dates[0] ==  req.query.date_emailed,
+                islast: dates[-1] == req.query.date_emailed,
+                current: moment(q.date_emailed).format('MMMM DD, YYYY'),
+                next: next,
+                prev: prev
+            }
+            res.render('index', payload);
         });
+        
     });
 });
 
 app.post('/image', function(req, res) {
     res.send({ status: "OK" });
 });
-
 
 /*
  * Routes for Robots/404
