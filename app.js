@@ -22,9 +22,7 @@ var app = express()
  */
 app.configure(function() {
     app.set('port', process.env.PORT || 5000);
-
     app.set('views', __dirname + '/views');
-
     app.set('view engine', 'html');
     app.engine('html', exphbs({
         defaultLayout: 'main',
@@ -32,14 +30,12 @@ app.configure(function() {
         //helpers: helpers
     }));
     app.enable('view cache');
-
     app.use(lessMiddleware({
         src: __dirname + '/public',
         compress: true,
         sourceMap: true
     }));
     app.use(express.static(path.join(__dirname, 'public')));
-
     app.use(express.bodyParser());
     app.use(express.favicon());
     app.use(express.logger('dev')); 
